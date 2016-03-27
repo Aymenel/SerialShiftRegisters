@@ -40,20 +40,17 @@ void SerialShiftRegisters::SetGlobal(int indexPin, bool value) {
 
 void SerialShiftRegisters::Push() {
 	//Устанавливаем синхронизацию "защелки" на LOW
-    digitalWrite(_latchPin, LOW);
+    	digitalWrite(_latchPin, LOW);
 	
+	//"Проталкиваем" байты в регистры
 	for(int i = _countSSR - 1; i >= 0 ; i--) { //Цикл по сдвиговым регистрам
 		for(int j = _bitCountSSR - 1; j >= 0; j--) { //Цикл по пинам сдвигового регистра
 			_shiftOutExt(_pins[i][j]);
 		}
 	}
 	
-	//"Проталкиваем" байты в регистры
-    //shiftOut(_dataPin, _clockPin, MSBFIRST, registerTwo);
-	//_shiftOutExt
-	
 	//"Защелкиваем" регистр, тем самым устанавливая значения на выходах
-    digitalWrite(_latchPin, HIGH);
+	digitalWrite(_latchPin, HIGH);
 }
 
 void SerialShiftRegisters::_shiftOutExt(bool val) {
