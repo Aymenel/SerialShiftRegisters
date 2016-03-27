@@ -35,12 +35,12 @@ void SerialShiftRegisters::Set(int indexSSR, int indexPinSSR, bool value) {
 }
 
 void SerialShiftRegisters::SetGlobal(int indexPin, bool value) {
-	_pins[indexPin / bitCountSSR][indexPin - indexPin / bitCountSSR * bitCountSSR] = value;
+	_pins[indexPin / _bitCountSSR][indexPin - indexPin / _bitCountSSR * _bitCountSSR] = value;
 }
 
 void SerialShiftRegisters::Push() {
 	//Устанавливаем синхронизацию "защелки" на LOW
-    	digitalWrite(_latchPin, LOW);
+    digitalWrite(_latchPin, LOW);
 	
 	//"Проталкиваем" байты в регистры
 	for(int i = _countSSR - 1; i >= 0 ; i--) { //Цикл по сдвиговым регистрам
