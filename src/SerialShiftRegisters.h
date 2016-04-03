@@ -9,8 +9,14 @@ class SerialShiftRegisters {
 		void Set(int indexSSR, int indexPinSSR, bool value);
 		void SetGlobal(int indexPin, bool value);
 		void Push();
+		
+		void Debug();
 	private:
-		void _shiftOutExt(bool val);
+		void _ShiftOutExt(bool val);
+		void _PrintArray();
+		
+		//Отладочный режим
+		bool _debug = false;
 		
 		//Признак инициализации класса
 		bool _initialized = false;
@@ -28,7 +34,7 @@ class SerialShiftRegisters {
 		int _dataPin = 0;
 		
 		//Указатель на указатель на строку (Двумерный массив пинов [номер сдвигового регистра][номер бита]=состояние бита)
-		int **_pins;
+		bool **_ptrPins;
 };
 
 #endif

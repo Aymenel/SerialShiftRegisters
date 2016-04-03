@@ -15,47 +15,87 @@ void SerialShiftRegisters::Initialize(int countSSR, int bitCountSSR, int latchPi
 	pinMode(_dataPin, OUTPUT);
 	
 	//Выделение памяти под указатели на строки
-	_pins = (int**)malloc(_countSSR * sizeof(int*));
+	_ptrPins = (bool**)malloc(_countSSR * sizeof(bool*));
 	
 	//Ввод элементов массива
 	for(int i = 0; i < _countSSR; i++) { //Цикл по строкам
 		//Выделение памяти под хранение строк
-		_pins[i] = (int*)malloc(_bitCountSSR * sizeof(bool));
+		_ptrPins[i] = (bool*)malloc(_bitCountSSR * sizeof(bool));
 		
 		for(int j = 0; j < _bitCountSSR; j++) { //Цикл по столбцам
-			_pins[i][j] = 0;
+			_ptrPins[i][j] = false;
 		}
+	}
+	
+	if (_debug) {
+		Serial.println("Initialize");
+		_PrintArray();
 	}
 	
 	_initialized = true;
 }
 
 void SerialShiftRegisters::Set(int indexSSR, int indexPinSSR, bool value) {
-	_pins[indexSSR][indexPinSSR] = value;
+	_ptrPins[indexSSR][indexPinSSR] = value;
+
+	if (_debug) {
+		Serial.println("Set");
+		_PrintArray();
+	}
 }
 
 void SerialShiftRegisters::SetGlobal(int indexPin, bool value) {
-	_pins[indexPin / _bitCountSSR][indexPin - indexPin / _bitCountSSR * _bitCountSSR] = value;
+	_ptrPins[indexPin / _bitCountSSR][indexPin - indexPin / _bitCountSSR * _bitCountSSR] = value;
+
+	if (_debug) {
+		Serial.println("SetGlobal");
+		_PrintArray();
+	}
 }
 
-void SerialShiftRegisters::Push() {
+void SerialShiftRegisters::Push() {	
 	//Устанавливаем синхронизацию "защелки" на LOW
     digitalWrite(_latchPin, LOW);
 	
 	//"Проталкиваем" байты в регистры
 	for(int i = _countSSR - 1; i >= 0 ; i--) { //Цикл по сдвиговым регистрам
 		for(int j = _bitCountSSR - 1; j >= 0; j--) { //Цикл по пинам сдвигового регистра
-			_shiftOutExt(_pins[i][j]);
+			_ShiftOutExt(_ptrPins[i][j]);
 		}
 	}
-	
+
+	if (_debug) {
+		Serial.println("Push");
+		_PrintArray();
+	}
+
 	//"Защелкиваем" регистр, тем самым устанавливая значения на выходах
 	digitalWrite(_latchPin, HIGH);
 }
 
-void SerialShiftRegisters::_shiftOutExt(bool val) {
-	digitalWrite(_dataPin, val);
+void SerialShiftRegisters::Debug() {
+	_debug = !_debug;
+}
+
+void SerialShiftRegisters::_ShiftOutExt(bool val) {
+	if (val) {
+		digitalWrite(_dataPin, HIGH);
+	} else {
+		digitalWrite(_dataPin, LOW);
+	}
 	
 	digitalWrite(_clockPin, HIGH);
 	digitalWrite(_clockPin, LOW);
+}
+
+void SerialShiftRegisters::_PrintArray() {
+	char out[256];
+
+	for(int i = 0; i < _countSSR; i++) { //Цикл по сдвиговым регистрам
+		for(int j = 0; j < _bitCountSSR; j++) { //Цикл по пинам сдвигового регистра
+			sprintf(out, "%s%d%s%d%s%d", "Registr=", i, " Pin=", j, " Value=", _ptrPins[i][j]);
+			Serial.println(out);
+		}
+	}
+	Serial.println("");
 }
